@@ -1,0 +1,8 @@
+name: $pluginName
+main: $pluginMain
+api-version: "1.17"
+version: $version
+libraries:
+  - io.github.monun:kommand:2.6.5
+  - io.github.monun:tap:4.1.7
+# 이거 존나 편함
