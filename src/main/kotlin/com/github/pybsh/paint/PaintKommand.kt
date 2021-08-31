@@ -6,6 +6,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.bukkit.plugin.Plugin
+import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
 object PaintKommand {
@@ -51,6 +52,7 @@ object PaintKommand {
 
     private val config = getInstance().config
     private val scheduler = getInstance().server.scheduler
+    private var task: BukkitTask? = null
 
     fun paintKommand() {
         getInstance().kommand {
@@ -64,7 +66,7 @@ object PaintKommand {
                     config.set("${player.uniqueId}.Pen",false)
 
                     player.inventory.heldItemSlot = 0
-                    scheduler.runTaskTimer(getInstance(), Runnable {
+                    task = scheduler.runTaskTimer(getInstance(), Runnable {
                         val flag = config.getBoolean("${player.uniqueId}.PaintMod")
 
                         if(flag) {
@@ -82,8 +84,10 @@ object PaintKommand {
                             if (slotItem != null) {
                                 if (slotItem.type == Material.BARRIER) {
                                     config.set("${player.uniqueId}.PaintMod", false)
+                                    config.set("${player.uniqueId}.Pen",false)
                                     player.sendMessage("그림그리기 종료!")
                                     player.inventory.clear()
+                                    scheduler.cancelTask(task!!.taskId)
                                 } else if (slotItem.type == Material.PAPER) {
                                     if (page >= 3) config.set("${player.uniqueId}.Page", 1)
                                     else config.set("${player.uniqueId}.Page", page + 1)
