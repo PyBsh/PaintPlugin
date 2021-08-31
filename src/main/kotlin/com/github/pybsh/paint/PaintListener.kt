@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitScheduler
 import org.bukkit.scheduler.BukkitTask
+import java.util.*
 
 class PaintListener: Listener {
     private fun getInstance(): Plugin {
@@ -19,7 +20,7 @@ class PaintListener: Listener {
 
     private val config = getInstance().config
     private val scheduler = getInstance().server.scheduler
-    private var task: BukkitTask? = null
+    private var task: MutableMap<UUID, BukkitTask> = mutableMapOf()
 
     @EventHandler
     fun onPlayerInteract(e: PlayerInteractEvent){
@@ -36,20 +37,21 @@ class PaintListener: Listener {
                 if (!f) player.sendMessage(text("펜 내리기!"))
                 else player.sendMessage(text("펜 올리기!"))
 
-                task = scheduler.runTaskTimer(getInstance(), Runnable {
+                val t = scheduler.runTaskTimer(getInstance(), Runnable {
 
                     val flag = config.getBoolean("${player.uniqueId}.Pen")
                     if (flag) {
                         val block = player.getTargetBlock(100)
                         val canvas = config.getItemStack("${player.uniqueId}.Block")
 
-                        if (block != null && canvas != null) block.type = canvas.type
+                        if (block?.type != Material.AIR && canvas != null) block?.type = canvas.type
                     }
                     else{
-                        scheduler.cancelTask(task!!.taskId)
+                        scheduler.cancelTask(task[player.uniqueId]!!.taskId)
                     }
                 }, 0L, 0L)
 
+                task[player.uniqueId] = t
             }
         }
 

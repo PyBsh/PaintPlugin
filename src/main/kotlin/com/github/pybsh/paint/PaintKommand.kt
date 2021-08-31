@@ -50,9 +50,45 @@ object PaintKommand {
         8 to ItemStack(Material.BARRIER)
     )
 
+    val Page4: MutableMap<Int, ItemStack> = mutableMapOf(
+        0 to ItemStack(Material.ARROW),
+        1 to ItemStack(Material.RED_TERRACOTTA),
+        2 to ItemStack(Material.ORANGE_TERRACOTTA),
+        3 to ItemStack(Material.YELLOW_TERRACOTTA),
+        4 to ItemStack(Material.PINK_TERRACOTTA),
+        5 to ItemStack(Material.MAGENTA_TERRACOTTA),
+        6 to ItemStack(Material.PURPLE_TERRACOTTA),
+        7 to ItemStack(Material.PAPER),
+        8 to ItemStack(Material.BARRIER)
+    )
+
+    val Page5: MutableMap<Int, ItemStack> = mutableMapOf(
+        0 to ItemStack(Material.ARROW),
+        1 to ItemStack(Material.BLUE_TERRACOTTA),
+        2 to ItemStack(Material.CYAN_TERRACOTTA),
+        3 to ItemStack(Material.LIGHT_BLUE_TERRACOTTA),
+        4 to ItemStack(Material.GREEN_TERRACOTTA),
+        5 to ItemStack(Material.LIME_TERRACOTTA),
+        6 to ItemStack(Material.AIR),
+        7 to ItemStack(Material.PAPER),
+        8 to ItemStack(Material.BARRIER)
+    )
+
+    val Page6: MutableMap<Int, ItemStack> = mutableMapOf(
+        0 to ItemStack(Material.ARROW),
+        1 to ItemStack(Material.BLACK_TERRACOTTA),
+        2 to ItemStack(Material.GRAY_TERRACOTTA),
+        3 to ItemStack(Material.BROWN_TERRACOTTA),
+        4 to ItemStack(Material.LIGHT_GRAY_TERRACOTTA),
+        5 to ItemStack(Material.WHITE_TERRACOTTA),
+        6 to ItemStack(Material.AIR),
+        7 to ItemStack(Material.PAPER),
+        8 to ItemStack(Material.BARRIER)
+    )
+
     private val config = getInstance().config
     private val scheduler = getInstance().server.scheduler
-    private var task: BukkitTask? = null
+    private var task: MutableMap<UUID, BukkitTask> = mutableMapOf()
 
     fun paintKommand() {
         getInstance().kommand {
@@ -66,7 +102,7 @@ object PaintKommand {
                     config.set("${player.uniqueId}.Pen",false)
 
                     player.inventory.heldItemSlot = 0
-                    task = scheduler.runTaskTimer(getInstance(), Runnable {
+                    val t = scheduler.runTaskTimer(getInstance(), Runnable {
                         val flag = config.getBoolean("${player.uniqueId}.PaintMod")
 
                         if(flag) {
@@ -76,6 +112,9 @@ object PaintKommand {
                                 1 -> Page1.forEach { x -> player.inventory.setItem(x.key, x.value) }
                                 2 -> Page2.forEach { x -> player.inventory.setItem(x.key, x.value) }
                                 3 -> Page3.forEach { x -> player.inventory.setItem(x.key, x.value) }
+                                4 -> Page4.forEach { x -> player.inventory.setItem(x.key, x.value) }
+                                5 -> Page5.forEach { x -> player.inventory.setItem(x.key, x.value) }
+                                6 -> Page6.forEach { x -> player.inventory.setItem(x.key, x.value) }
                             }
 
                             val slot = player.inventory.heldItemSlot
@@ -87,9 +126,9 @@ object PaintKommand {
                                     config.set("${player.uniqueId}.Pen",false)
                                     player.sendMessage("그림그리기 종료!")
                                     player.inventory.clear()
-                                    scheduler.cancelTask(task!!.taskId)
+                                    scheduler.cancelTask(task[player.uniqueId]!!.taskId)
                                 } else if (slotItem.type == Material.PAPER) {
-                                    if (page >= 3) config.set("${player.uniqueId}.Page", 1)
+                                    if (page >= 6) config.set("${player.uniqueId}.Page", 1)
                                     else config.set("${player.uniqueId}.Page", page + 1)
                                     player.inventory.heldItemSlot = 0
                                 } else if (slotItem.type.isBlock) {
@@ -103,7 +142,7 @@ object PaintKommand {
                             getInstance().saveConfig()
                         }
                     }, 0L ,0L)
-
+                    task[player.uniqueId] = t
                 }
             }
         }
